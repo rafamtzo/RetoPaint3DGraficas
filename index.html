@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reto Paint3D</title>
+    <style>
+        html, 
+        body {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        }
+    </style>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+</head>
+
+<body>
+    
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three/build/three.module.js';
+        import { OrbitControls } from "https://unpkg.com/three@0.119.0/examples/jsm/controls/OrbitControls.js";
+        import Stats from "https://unpkg.com/three/examples/jsm/libs/stats.module.js";
+
+        "using strict";
+
+        let renderer, scene, camera, cameraControl, mesh, stats, mesh2, mesh3;
+
+        function init() {
+        // RENDERER
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // SCENE
+        scene = new THREE.Scene();
+
+        // CAMERA
+        let fov = 100;
+        let aspect = window.innerWidth / window.innerHeight;
+        let near = 0.1;
+        let far = 10000;
+        camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        camera.position.set(0, 0, 3);
+        cameraControl = new OrbitControls(camera, renderer.domElement);
+
+        // MODELS
+        let geometry = new THREE.BoxGeometry();
+        let material = new THREE.MeshBasicMaterial({color: "white", wireframe: true});
+        mesh = new THREE.Mesh(geometry, material);
+        mesh.position.x = 0;
+
+        let geometry2 = new THREE.SphereGeometry();
+        let material2 = new THREE.MeshBasicMaterial({color: "white", wireframe: true});
+        mesh2 = new THREE.Mesh(geometry2,material2);
+        mesh2.position.x = 2;
+
+        let geometry3 = new THREE.ConeGeometry();
+        let material3 = new THREE.MeshBasicMaterial({color: "white", wireframe: true});
+        mesh3 = new THREE.Mesh(geometry3, material3);
+        mesh3.position.x = -2;
+
+        // SCENE GRAPH
+        scene.add(mesh);
+        scene.add(mesh2);
+        scene.add(mesh3);
+
+        // GUI
+        let gui = new dat.GUI();
+
+        // model
+        let listColors = ["White", "Red", "Blue", "Green", "Pink"];
+
+        let model = {
+            rotY: mesh.rotation.y * 180 / Math.PI,
+            rotX: mesh.rotation.x * 180 / Math.PI,
+            rotZ: mesh.rotation.z * 180 / Math.PI,
+            listColors,
+            defaultItem: listColors[0],
+            colorPalette: [255, 255, 255]
+        }
+
+        let model2 = {
+            rotY: mesh.rotation.y * 180 / Math.PI,
+            rotX: mesh.rotation.x * 180 / Math.PI,
+            rotZ: mesh.rotation.z * 180 / Math.PI,
+            listColors,
+            defaultItem: listColors[0],
+            colorPalette: [255, 255, 255]
+        }
+
+        let model3 = {
+            rotY: mesh.rotation.y * 180 / Math.PI,
+            rotX: mesh.rotation.x * 180 / Math.PI,
+            rotZ: mesh.rotation.z * 180 / Math.PI,
+            listColors,
+            defaultItem: listColors[0],
+            colorPalette: [255, 255, 255]
+        }
+
+        // view & controller
+
+        // Position Menu
+        let posMenu = gui.addFolder("Menu de Posiciones");
+        posMenu.open();
+
+        //Model Position
+        // Menu posiciones Cubo
+        let sliderPosX = posMenu.add(mesh.position, "x").min(-5).max(5).step(0.5).name("Slider Cube X").listen().onChange(function(value) {
+        });
+
+        let sliderPosY = posMenu.add(mesh.position, "y").min(-5).max(5).step(0.5).name("Slider Cube Y").listen().onChange(function(value) {
+        });
+
+        let sliderPosZ = posMenu.add(mesh.position, "z").min(-5).max(5).step(0.5).name("Slider Cube Z").listen().onChange(function(value) {
+        });
+
+        // Menu posiciones Sphere
+        let sliderPosSphereX = posMenu.add(mesh2.position, "x").min(-5).max(5).step(0.5).name("Slider Sphere X").listen().onChange(function(value){
+        });
+
+        let sliderPosSphereY = posMenu.add(mesh2.position, "y").min(-5).max(5).step(0.5).name("Slider Sphere Y").listen().onChange(function(value){
+        });
+
+        let sliderPosSphereZ = posMenu.add(mesh2.position, "z").min(-5).max(5).step(0.5).name("Slider Sphere Z").listen().onChange(function(value){
+        });
+
+        // Menu posiciones Cone
+        let sliderPosConeX = posMenu.add(mesh3.position, "x").min(-5).max(5).step(0.5).name("Slider Cone X").listen().onChange(function(value){
+        });
+
+        let sliderPosConeY = posMenu.add(mesh3.position, "y").min(-5).max(5).step(0.5).name("Slider Cone Y").listen().onChange(function(value){
+        });
+
+        let sliderPosConeZ = posMenu.add(mesh3.position, "z").min(-5).max(5).step(0.5).name("Slider Cone Z").listen().onChange(function(value){
+        });
+
+        // Rotation Menu
+        let rotMenu = gui.addFolder("Menu de Rotaciones");
+        rotMenu.open();
+
+        // Model Orientation
+        // Rotaciones del Cubo
+        let sliderRotY = rotMenu.add(model, "rotY").min(-180).max(180).step(5).name("Rotacion Y Cubo").listen().onChange(function(value) {
+            mesh.rotation.y = value * Math.PI / 180;
+        });
+
+        let sliderRotX = rotMenu.add(model, "rotX").min(-180).max(180).step(5).name("Rotacion X Cubo").listen().onChange(function(value) {
+            mesh.rotation.x = value * Math.PI / 180;
+        });
+
+        let sliderRotZ = rotMenu.add(model, "rotZ").min(-180).max(180).step(5).name("Rotacion Z Cubo").listen().onChange(function(value) {
+            mesh.rotation.z = value * Math.PI / 180;
+        });
+
+        // Rotaciones de la Sphere
+        let sliderRotYSphere = rotMenu.add(model2, "rotY").min(-180).max(180).step(5).name("Rotacion Y Esfera").listen().onChange(function(value) {
+            mesh2.rotation.y = value * Math.PI / 180;
+        });
+
+        let sliderRotXSphere = rotMenu.add(model2, "rotX").min(-180).max(180).step(5).name("Rotacion X Esfera").listen().onChange(function(value) {
+            mesh2.rotation.x = value * Math.PI / 180;
+        });
+
+        let sliderRotZSphere = rotMenu.add(model2, "rotZ").min(-180).max(180).step(5).name("Rotacion Z Esfera").listen().onChange(function(value) {
+            mesh2.rotation.z = value * Math.PI / 180;
+        });
+
+        //Rotaciones de Cone
+        let sliderRotYCone = rotMenu.add(model3, "rotY").min(-180).max(180).step(5).name("Rotacion Y Cone").listen().onChange(function(value) {
+            mesh3.rotation.y = value * Math.PI / 180;
+        });
+
+        let sliderRotXCone = rotMenu.add(model3, "rotX").min(-180).max(180).step(5).name("Rotacion X Cone").listen().onChange(function(value) {
+            mesh3.rotation.x = value * Math.PI / 180;
+        });
+
+        let sliderRotZCone = rotMenu.add(model3, "rotZ").min(-180).max(180).step(5).name("Rotacion Z Cone").listen().onChange(function(value) {
+            mesh3.rotation.z = value * Math.PI / 180;
+        });
+
+        // Model's Appearance Menu
+        let appearMenu = gui.addFolder("Menu de Apariencias");
+        appearMenu.open();
+
+        // Model Draw Mode
+        let chbWireframe = appearMenu.add(mesh.material, "wireframe").setValue(true).name("Cube Wireframe").onChange(function(value) {
+            
+        });
+
+        let sphereWireframe = appearMenu.add(mesh2.material, "wireframe").setValue(true).name("Sphere Wireframe").onChange(function(value) {
+            
+        });
+
+        let coneWireframe = appearMenu.add(mesh3.material, "wireframe").setValue(true).name("Cone Wireframe").onChange(function(value) {
+            
+        });
+
+        let listColor = appearMenu.add(model, "defaultItem", model.listColors).name("Cube Color").onChange(function(item) {
+            mesh.material.color = new THREE.Color(item.toLowerCase());
+            model.colorPalette = [mesh.material.color.r * 255, mesh.material.color.g * 255, mesh.material.color.b * 255];
+        });
+
+        let listColor2 = appearMenu.add(model2, "defaultItem", model2.listColors).name("Sphere Color").onChange(function(item) {
+            mesh2.material.color = new THREE.Color(item.toLowerCase());
+            model2.colorPalette = [mesh2.material.color.r * 255, mesh2.material.color.g * 255, mesh2.material.color.b * 255];
+        });
+
+        let listColor3 = appearMenu.add(model3, "defaultItem", model3.listColors).name("Cone Color").onChange(function(item) {
+            mesh3.material.color = new THREE.Color(item.toLowerCase());
+            model3.colorPalette = [mesh3.material.color.r * 255, mesh3.material.color.g * 255, mesh3.material.color.b * 255];
+        });
+
+        gui.close();
+
+        // STATS
+        stats = new Stats();
+        stats.showPanel(0);
+        document.body.appendChild(stats.dom);
+
+        // RENDER LOOP
+        renderLoop();
+        }
+
+        function renderLoop() {
+            stats.begin();
+            renderer.render(scene, camera); // DRAW SCENE
+            updateScene();
+            stats.end();
+            stats.update();
+            requestAnimationFrame(renderLoop);
+        }
+
+        function updateScene() {
+            
+        }
+
+        // EVENT LISTENERS & HANDLERS
+        document.addEventListener("DOMContentLoaded", init);
+
+        window.addEventListener("resize", function() {
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        });
+    </script>
+</body>
+</html>
