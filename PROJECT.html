@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script type="text/javascript"src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
+  <script type="module">
+    
+
+    // Find the latest version by visiting https://unpkg.com/three. The URL will
+    // redirect to the newest stable release.
+    import * as THREE from 'https://unpkg.com/three/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.1/examples/jsm/controls/OrbitControls.js';
+    import Stats from 'https://unpkg.com/three@0.126.1/examples/jsm/libs/stats.module.js';
+    import dat from 'https://unpkg.com/three@0.126.1/examples/jsm/libs/dat.gui.module.js';
+
+    let renderer, scene, camera, mesh, meshc, mesht, stats;
+    
+
+
+    function init(){
+        
+        //const scene = new THREE.Scene();
+        //Renderer
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(new THREE.Color(0, 0, 0));
+        document.body.appendChild(renderer.domElement);
+        //scene 
+        scene =new THREE.Scene();
+
+        //Camera
+        let fov = 60;
+        let aspect = window.innerWidth / window.innerHeight;
+        let near = 0.1;
+        let far = 10000;
+        camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+        camera.position.set(0,0,50);
+        let cameraControl = new OrbitControls(camera, renderer.domElement);
+
+        //Models
+
+        //let geometry = new THREE.CylinderGeometry(0,2,2,4,1, false);
+        // create a simple square shape. We duplicate the top left and bottom right
+        // vertices because each vertex needs to appear once per triangle.
+       /* var vert = [
+            new THREE.Vector3( 0, 0, 0 ),
+            new THREE.Vector3( 0, 1, 0 ),
+            new THREE.Vector3( 1, 1, 0 ),
+            new THREE.Vector3( 1, 0, 0 ),
+            new THREE.Vector3( 1, 1, 1 )
+        ];
+        let geometry = new THREE.BufferGeometry().setFromPoints(vert);
+        geometry.setIndex([
+          0, 1, 2, 
+          0, 2, 3,
+          1, 0, 5,
+          2, 1, 5,
+          3, 2, 5,
+          0, 3, 5,
+        ]);
+        geometry.computeVertexNormals();*/
+        let geometrys = new THREE.SphereGeometry( 5, 10, 10);
+        let material = new THREE.MeshBasicMaterial({
+            color: "white",
+            wireframe: true,
+            opacity: 1.0,
+            transparent: true,
+        });
+        mesh = new THREE.Mesh(geometrys, material);
+        mesh.name = "Sphere";
+
+        
+        //scene graph
+        scene.add(mesh);
+        mesh.position.y = 1;
+        
+        //GUI
+        let gui = new dat.GUI();
+
+        // model
+        let listColors = ["White", "Red", "Blue"];
+        let model = {
+            rotY: mesh.rotation.y * 180 / Math.PI,
+            rotX: mesh.rotation.x * 180 / Math.PI,
+            rotZ: mesh.rotation.z * 180 / Math.PI,
+            posHome: function() {
+                mesh.position.x = 0;
+                model.rotY = 0;
+                mesh.rotation.y = model.rotY;
+                mesh.rotation.x = model.rotY;
+                mesh.rotation.z = model.rotY;
+
+            },
+            listColors,
+            defaultItem: listColors[0],
+            colorPalette: [255, 255, 255],
+        };
+    // view & controller
+
+       // General menu
+       let generalMenu = gui.addFolder("General Menu");
+    // TextField Model Name
+    let tfMeshName = generalMenu.add(mesh, "name").name("Model's Name").onChange(function(value) {
+
+    }).onFinishChange(function(value) {
+        console.log(mesh.name);
+    });
+    generalMenu.open();
+
+    // Position Menu
+    let posMenu = gui.addFolder("Model's Position Menu");
+    //posMenu.open();
+    //Model Position
+    let btnPosHome = posMenu.add(model, "posHome").name("Default");
+
+    let sliderPosX = posMenu.add(mesh.position, "x").min(-100).max(100).step(0.5).name("X").listen().onChange(function(value) {
+    });
+    let sliderPosY = posMenu.add(mesh.position, "y").min(-100).max(100).step(0.5).name("Y").listen().onChange(function(value) {
+    });
+    let sliderPosZ = posMenu.add(mesh.position, "z").min(-100).max(100).step(0.5).name("Z").listen().onChange(function(value) {
+    });
+    // Button Position Home
+    
+
+    // Rotation Menu
+    let rotMenu = gui.addFolder("Model's Rotation Menu");
+    // Model Orientation
+    let sliderRotY = rotMenu.add(model, "rotY").min(-180).max(180).step(5).name("Y (deg)").listen().onChange(function(value) {
+        mesh.rotation.y = value * Math.PI / 180;
+    });
+    let sliderRotX = rotMenu.add(model, "rotX").min(-180).max(180).step(5).name("X (deg)").listen().onChange(function(value) {
+        mesh.rotation.x = value * Math.PI / 180;
+    });
+    let sliderRotZ = rotMenu.add(model, "rotZ").min(-180).max(180).step(5).name("Z (deg)").listen().onChange(function(value) {
+        mesh.rotation.z = value * Math.PI / 180;
+    });
+    
+    // Model's Appearance Menu
+    let appearMenu = gui.addFolder("Model's Appeareance Menu");
+    
+    // Model Draw Mode
+    let chbWireframe = appearMenu.add(mesh.material, "wireframe").setValue(true).name("Wireframe").onChange(function(value) {
+        
+    });
+    let listColor = appearMenu.add(model, "defaultItem", model.listColors).name("Color List").onChange(function(item) {
+        mesh.material.color = new THREE.Color(item.toLowerCase());
+        model.colorPalette = [mesh.material.color.r * 255, mesh.material.color.g * 255, mesh.material.color.b * 255];
+    });
+    let colorPalette = appearMenu.addColor(model, "colorPalette").name("Color Palette").listen().onChange(function(color) {
+        mesh.material.color = new THREE.Color(color[0]/255, color[1]/255, color[2]/255);
+    });
+
+    let sliderTrans = appearMenu.add(mesh.material, "opacity").min(0).max(1).step(0.01).name("Opacity").listen().onChange(function(value) {
+        mesh.material.opacity = value;
+    });
+    
+
+    //Scene menu
+    let sceneMenu = gui.addFolder("Scene Menu");
+    let colorPaletteS = sceneMenu.addColor(model, "colorPalette").name("Background Color").listen().onChange(function(color) {
+        renderer.setClearColor(new THREE.Color(color[0]/255, color[1]/255, color[2]/255));
+    });
+    // GRIDHELPER
+    let size = 1000.;
+    let divisions = 1000;
+    let colorCenterLine = "red";
+    let colorGrid = "grey";
+    let gridHelper = new THREE.GridHelper(size, divisions, colorCenterLine, colorGrid);
+    scene.add(gridHelper);
+
+    let chbGridHelper = sceneMenu.add(gridHelper, "visible").setValue(false).name("Plane");
+
+
+    gui.close();
+
+    // STATS
+    stats = new Stats();
+    stats.showPanel(0);
+    document.body.appendChild(stats.dom);
+
+    // RENDER LOOP
+    renderLoop();
+    }
+
+    function renderLoop() {
+    stats.begin();
+    renderer.render(scene, camera); // DRAW SCENE
+    updateScene();
+    stats.end();
+    stats.update();
+    requestAnimationFrame(renderLoop);
+    }
+
+    function updateScene() {
+
+    }
+
+    // EVENT LISTENERS & HANDLERS
+    document.addEventListener("DOMContentLoaded", init);
+
+    window.addEventListener("resize", function() {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+});
+  </script>
+</body>
+
+</html>
